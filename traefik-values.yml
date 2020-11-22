@@ -1,0 +1,59 @@
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: False
+
+entryPoints:
+  http:
+    address: :80
+    forwardedHeaders:
+      insecure: true
+    proxyProtocol:
+      insecure: true
+  https:
+    address: :443
+    forwardedHeaders:
+      insecure: true
+    proxyProtocol:
+      insecure: true
+  smtp: # for healthchecks incoming emails
+    address: :25
+    forwardedHeaders:
+      insecure: true
+    proxyProtocol:
+      insecure: true
+
+providers:
+  providersThrottleDuration: 2s
+  docker:
+    watch: true
+    exposedByDefault: false
+    endpoint: unix:///var/run/docker.sock
+    swarmModeRefreshSeconds: 15s
+  file:
+    directory: /conf.d
+    watch: true
+
+api:
+  dashboard: true
+  insecure: true
+  entryPoint: traefik-web-ui
+
+log:
+  level: ERROR
+
+certificatesResolvers:
+  dns:
+    acme:
+      email: "{var.TRAEFIK_EMAIL}"
+      storage: acme.json
+      dnsChallenge:
+        provider: digitalocean
+  http:
+    acme:
+      # caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      caServer: https://acme-staging.api.letsencrypt.org/directory
+      email: "{var.TRAEFIK_EMAIL}"
+      storage: acme.json
+      httpChallenge:
+        # used during the challenge
+        entryPoint: http
